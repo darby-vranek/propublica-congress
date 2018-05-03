@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>2017 House Office Spending</title>
+</head>
+<body>
+<div class="wrapper">
+	<h1>2017 House Office Spending</h1>
+	<table>
+			<caption>Representatives</caption>
+			<thead>
+				<tr>
+					<th>State</th>
+					<th>Name</th>
+					<th>Equipment</th>
+					<th>Franked Mail</th>
+					<th>Personnel</th>
+					<th>Printing</th>
+					<th>Utilities</th>
+					<th>Supplies</th>
+					<th>Travel</th>
+					<th>Other</th>
+					<th>Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for rep in reps %}
+				<tr>
+					<td>{{ rep.state.name }}
+					<td>{{ rep.first_name }} {{ rep.last_name }}</td>
+					<td>${{ rep.equipment }}</td>
+					<td>${{ rep.franked_mail }}</td>
+					<td>${{ rep.personnel }}</td>
+					<td>${{ rep.printing }}</td>
+					<td>${{ rep.rent_utilities }}</td>
+					<td>${{ rep.supplies }}</td>
+					<td>${{ rep.travel }}</td>
+					<td>${{ rep.other_services }}</td>
+					<td>${{ rep.total }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>	
+</div>
+</body>
+</html>
