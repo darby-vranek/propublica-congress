@@ -17,6 +17,12 @@ class House_Rep(models.Model):
 	state = models.ForeignKey('State', on_delete=models.CASCADE, related_name='house_reps')
 	party = models.CharField(max_length=5)
 
+	def full_term(self):
+		for q in self.spending_quarters.all():
+			if q.total == 0:
+				return False
+		return True
+
 	def equipment(self):
 		total = 0
 		for q in self.spending_quarters.all():

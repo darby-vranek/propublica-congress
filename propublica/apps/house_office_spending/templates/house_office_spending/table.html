@@ -2,45 +2,157 @@
 <html>
 <head>
 	<title>2017 House Office Spending</title>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/list.js/1.5.0/list.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<style>
+		.chart_holder {
+			width: 35%;
+			display: inline-block;
+			vertical-align: top;
+		}
+		table {
+			display: inline-block;
+			width: 60%;
+			height: 650px;
+			overflow-y: scroll;
+		}
+		td {
+			font-family: Helvetica;
+			font-size: 11px;
+		}
+		button {
+			border-style: none;
+			background-color: lightblue;
+			border: 1px solid darkblue;
+			height: 40px;
+			width: 100%;
+			font-weight: bold;
+		}
+		h1 {
+			text-align: center;
+		}
+	</style>
 </head>
 <body>
-<div class="wrapper">
+<div id="reps">
 	<h1>2017 House Office Spending</h1>
+	<div class="chart_holder">
+		<canvas id="pie" width=400 height=400></canvas>
+	</div>
 	<table>
-			<caption>Representatives</caption>
 			<thead>
 				<tr>
-					<th>State</th>
-					<th>Name</th>
-					<th>Equipment</th>
-					<th>Franked Mail</th>
-					<th>Personnel</th>
-					<th>Printing</th>
-					<th>Utilities</th>
-					<th>Supplies</th>
-					<th>Travel</th>
-					<th>Other</th>
-					<th>Total</th>
+					<th><button class="sort" data-sort="state">State</th>
+					<th><button class="sort" data-sort="name">Name</button></th>
+					<th><button class="sort" data-sort="party">Party</button>
+					<th><button class="sort" data-sort="equipment">Equipment</button></th>
+					<th><button class="sort" data-sort="franked_mail">Franked Mail</button></th>
+					<th><button class="sort" data-sort="personnel">Personnel</button></th>
+					<th><button class="sort" data-sort="printing">Printing</button></th>
+					<th><button class="sort" data-sort="utilities">Rent/Utilities</button></th>
+					<th><button class="sort" data-sort="supplies">Supplies</button></th>
+					<th><button class="sort" data-sort="travel">Travel</button></th>
+					<th><button class="sort" data-sort="other">Other</button></th>
+					<th><button class="sort" data-sort="total">Total</button></th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody class="list">
 				{% for rep in reps %}
-				<tr>
-					<td>{{ rep.state.name }}
-					<td>{{ rep.first_name }} {{ rep.last_name }}</td>
-					<td>${{ rep.equipment }}</td>
-					<td>${{ rep.franked_mail }}</td>
-					<td>${{ rep.personnel }}</td>
-					<td>${{ rep.printing }}</td>
-					<td>${{ rep.rent_utilities }}</td>
-					<td>${{ rep.supplies }}</td>
-					<td>${{ rep.travel }}</td>
-					<td>${{ rep.other_services }}</td>
-					<td>${{ rep.total }}</td>
-				</tr>
+				{% if rep.full_term %}
+					<tr>
+						<td class="state">{{ rep.state.name }}
+						<td class="name"><button id="{{ rep.pro_id }}">{{ rep.last_name }}, {{ rep.first_name }}</button></td>
+						<td class="party">{{ rep.party }}</td>
+						<td class="equipment">${{ rep.equipment }}</td>
+						<td class="franked_mail">${{ rep.franked_mail }}</td>
+						<td class="personnel">${{ rep.personnel }}</td>
+						<td class="printing">${{ rep.printing }}</td>
+						<td class="utilities">${{ rep.rent_utilities }}</td>
+						<td class="supplies">${{ rep.supplies }}</td>
+						<td class="travel">${{ rep.travel }}</td>
+						<td class="other">${{ rep.other_services }}</td>
+						<td class="total">${{ rep.total }}</td>
+					</tr>
+				{% endif %}
 				{% endfor %}
 			</tbody>
 		</table>	
+		<script>
+		$(document).ready(function() {
+			var options = {
+				valueNames: ['state', 'name', 'party', 'equipment', 'franked_mail', 'personnel', 'printing', 'utilities', 'supplies', 'travel', 'other', 'total']
+			};
+			var repList = new List('reps', options);
+			var ctx = document.getElementById("pie");
+			var myChart = new Chart(ctx, {
+				type: 'pie',
+				data: {
+					labels: ["Equipment", "Franked Mail", "Other Services", "Personnel", "Printing and Reproduction", "Rent/Communication Utilities", "Supplies and Materials", "Travel"],
+					datasets: [{
+						label: "Overall Spending",
+						data: [{{ equipment }}, {{ franked_mail }}, {{ other_services }}, {{ personnel }}, {{ printing }}, {{ rent_utilities }}, {{ supplies }}, {{ travel }}],
+						backgroundColor: [
+							'rgba(255, 255, 217, 1)',
+			                'rgba(237, 248, 177, 1)',
+			                'rgba(199, 233, 180, 1)',
+			                'rgba(127, 205, 187, 1)',
+			                'rgba(65, 182, 196, 1)',
+			                'rgba(29, 145, 192, 1)',
+							'rgba(34, 94, 168, 1)',
+							'rgba(12, 44, 132, 1)'
+						],
+						borderColor: [
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)'
+						],
+						borderWidth: 1
+					}]
+				}
+			});
+			{% for rep in reps %}
+			$("#{{ rep.pro_id }}").click(function() {
+			 	if (myChart.data.datasets.length > 1) {
+			 		myChart.data.datasets.pop();
+			 	}
+			 	myChart.data.datasets.push({
+			 		label: "Rep. {{ rep.first_name }} {{ rep.last_name }} Spending",
+			 		data: [{{ rep.equipment }}, {{ rep.franked_mail }}, {{ rep.other_services }}, {{ rep.personnel }}, {{ rep.printing }}, {{ rep.rent_utilities }}, {{ rep.supplies }}, {{ rep.travel }}],
+			 		backgroundColor: [
+							'rgba(255, 255, 217, 1)',
+			                'rgba(237, 248, 177, 1)',
+			                'rgba(199, 233, 180, 1)',
+			                'rgba(127, 205, 187, 1)',
+			                'rgba(65, 182, 196, 1)',
+			                'rgba(29, 145, 192, 1)',
+							'rgba(34, 94, 168, 1)',
+							'rgba(12, 44, 132, 1)'
+						],
+						borderColor: [
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)',
+							'rgba(0, 0, 0, 1)'
+						],
+						borderWidth: 1
+			 	});
+			 	myChart.update();
+			 });
+			{% endfor %}
+		});
+		</script>
 </div>
 </body>
 </html>
